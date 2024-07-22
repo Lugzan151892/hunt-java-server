@@ -70,6 +70,10 @@ public class UserModel {
         this.hunt_settings = hunt_settings;
     }
 
+    public String getUsername() {
+        return this.username;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -78,6 +82,10 @@ public class UserModel {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
         this.password = bCryptPasswordEncoder.encode(password);
+    }
+
+    public Date getCreated_at() {
+        return created_at;
     }
 
     public Boolean checkPassword(String password) {
