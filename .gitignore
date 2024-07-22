@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### LOCAL PRIVATE VARIABLES ###
+/src/main/java/lugzan/co/huntjavaserver/utils/PrivateVariables.java
