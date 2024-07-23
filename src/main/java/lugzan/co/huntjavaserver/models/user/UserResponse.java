@@ -4,6 +4,10 @@ public class UserResponse {
     private UserModel user;
     private String token;
 
+    public UserResponse(UserModel user) {
+        this.user = user;
+    }
+
     public UserResponse(UserModel user, String token) {
         this.user = user;
         this.token = token;

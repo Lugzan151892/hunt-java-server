@@ -42,6 +42,7 @@ public class ApiDTO {
 
     public void setStatus(Integer status) {
         this.status = status;
+        this.setError(this.getErrorByStatus(status));
     }
 
     public String getMessage() {
