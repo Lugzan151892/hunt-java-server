@@ -17,6 +17,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.DecodedJWT;
+
 @Controller
 @RequestMapping(path = "/api/user", produces = "text/plain;charset=UTF-8")
 public class UserController {
@@ -26,6 +29,11 @@ public class UserController {
     private final static ApiService apiService = new ApiService();
 
     private static final int millisecondsInHour = 60000 * 60;
+
+    static private Boolean isTokenExpired (String token) {
+        DecodedJWT jwt = JWT.decode(token);
+        return jwt.getExpiresAt().before(new Date());
+    }
 
     static public Claims getTokenData (String token) {
         return Jwts.parser()
@@ -44,7 +52,7 @@ public class UserController {
                 .compact();
     }
 
-    @PostMapping(path="/registration")
+    @PostMapping(path="/registration", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ApiDTO addNewUser (@RequestBody SignUpRequest request) {
         UserModel userExistName = userRepository.findByUsername(request.getEmail());
 
@@ -62,7 +70,7 @@ public class UserController {
         return apiService.createSuccessResponse(response);
     }
 
-    @PostMapping(path = "/login")
+    @PostMapping(path = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ApiDTO login (@RequestBody SignUpRequest request) {
         UserModel user = userRepository.findByUsername(request.getEmail());
         if (user == null) {
@@ -86,18 +94,24 @@ public class UserController {
     @GetMapping(path = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ApiDTO check (@RequestHeader(value = "Authorization", required = false) String token) {
         if (token == null || token.isEmpty()) {
-            apiService.setStatus(400);
+            apiService.setStatus(401);
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");
-
         }
+
         String subToken = token.substring(7);
+
+        if (isTokenExpired(subToken)) {
+            apiService.setStatus(401);
+            return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_EXPIRED, "");
+        }
+
         Claims claims = getTokenData(subToken);
 
         String userName = claims.getSubject();
         UserModel user = userRepository.findByUsername(userName);
 
         if (user == null) {
-            apiService.setStatus(400);
+            apiService.setStatus(401);
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");
         }
 
@@ -107,13 +121,19 @@ public class UserController {
         return apiService.createSuccessResponse(response);
     }
 
-    @GetMapping(path = "/get")
+    @GetMapping(path = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ApiDTO getUser (@RequestHeader(value = "Authorization", required = false) String token) {
         if (token == null || token.isEmpty()) {
-            apiService.setStatus(400);
+            apiService.setStatus(401);
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");
         }
         String subToken = token.substring(7);
+
+        if (isTokenExpired(subToken)) {
+            apiService.setStatus(401);
+            return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_EXPIRED, "");
+        }
+
         Claims claims = getTokenData(subToken);
 
         String userName = claims.getSubject();
@@ -130,4 +150,34 @@ public class UserController {
         return apiService.createSuccessResponse(response);
     }
 
+    @PutMapping(path = "/set", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody ApiDTO setUser (@RequestBody SetUserRequest request, @RequestHeader(value = "Authorization", required = false) String token) {
+        if (token == null || token.isEmpty()) {
+            apiService.setStatus(401);
+            return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");
+        }
+        String subToken = token.substring(7);
+
+        if (isTokenExpired(subToken)) {
+            apiService.setStatus(401);
+            return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_EXPIRED, "");
+        }
+
+        Claims claims = getTokenData(subToken);
+
+        String userName = claims.getSubject();
+        UserModel user = userRepository.findByUsername(userName);
+
+        if (user == null) {
+            apiService.setStatus(400);
+            return apiService.createErrorResponse(ApiErrorMessageEnums.USER_NOT_FOUND, userName);
+        }
+
+        user.setHunt_settings(request.getHunt_settings());
+        user.setSpectated_users(request.getSpectated_users());
+        userRepository.save(user);
+        UserResponse response = new UserResponse(user);
+
+        return apiService.createSuccessResponse(response);
+    }
 }

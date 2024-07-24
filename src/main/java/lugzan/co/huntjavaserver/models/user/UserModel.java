@@ -2,13 +2,21 @@ package lugzan.co.huntjavaserver.models.user;
 
 import jakarta.persistence.*;
 import lugzan.co.huntjavaserver.controllers.users.SignUpRequest;
-import org.json.JSONObject;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name="users")
@@ -25,11 +33,14 @@ public class UserModel {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, columnDefinition="LONGTEXT")
-    private String spectated_users;
+    @ElementCollection
+    @Column(nullable = false)
+    private List<String> spectated_users = new ArrayList<>();
 
-    @Column(nullable = false, columnDefinition="LONGTEXT")
-    private String hunt_settings;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(nullable = false)
+    @JsonAnySetter
+    private Map<String,Object> hunt_settings = new HashMap<>();
 
     @CreatedDate
     @Column(updatable = false)
@@ -44,8 +55,6 @@ public class UserModel {
     public UserModel(SignUpRequest request) {
         setPassword(request.getPassword());
         setUsername(request.getEmail());
-        setSpectated_users(String.valueOf(new JSONObject()));
-        setHunt_settings(String.valueOf(new JSONObject()));
         this.created_at = new Date();
         this.updated_at = LocalDateTime.now();
     }
@@ -54,19 +63,19 @@ public class UserModel {
         return id;
     }
 
-    public String getSpectated_users() {
+    public List<String> getSpectated_users() {
         return spectated_users;
     }
 
-    public void setSpectated_users(String spectated_users) {
+    public void setSpectated_users(List<String> spectated_users) {
         this.spectated_users = spectated_users;
     }
 
-    public String getHunt_settings() {
+    public Map<String, Object> getHunt_settings() {
         return hunt_settings;
     }
 
-    public void setHunt_settings(String hunt_settings) {
+    public void setHunt_settings(Map<String, Object> hunt_settings) {
         this.hunt_settings = hunt_settings;
     }
 
