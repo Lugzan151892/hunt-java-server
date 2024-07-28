@@ -38,15 +38,15 @@ public class BannedUser {
     @Column(updatable = false, name = "created_at")
     private Date created_at;
 
-    @Column
+    @Column(name = "comments")
     @JsonManagedReference
     @OneToMany(mappedBy = "banned_user")
     private Set<BannedComment> comments;
 
     @ManyToMany
     @JoinTable(
-        name = "users", 
+        name = "users_and_banned", 
         joinColumns = @JoinColumn(name = "banned_id"), 
         inverseJoinColumns = @JoinColumn(name = "comment_id"))
-    Set<UserModel> users;
+    private Set<UserModel> users;
 }

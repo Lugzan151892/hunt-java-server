@@ -59,7 +59,7 @@ public class UserModel {
     private List<BannedComment> banned_comments;
 
     @ManyToMany(mappedBy = "users")
-    Set<BannedUser> banned_users;
+    private Set<BannedUser> banned_users;
 
     public UserModel() {}
 
