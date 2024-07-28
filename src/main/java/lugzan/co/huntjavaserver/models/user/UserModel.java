@@ -2,6 +2,8 @@ package lugzan.co.huntjavaserver.models.user;
 
 import jakarta.persistence.*;
 import lugzan.co.huntjavaserver.controllers.users.SignUpRequest;
+import lugzan.co.huntjavaserver.models.banned_users.BannedUser;
+import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -10,6 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Entity
 @Table(name="users")
@@ -33,7 +37,6 @@ public class UserModel {
     @Column(nullable = false)
     private String password;
 
-    @ElementCollection
     @Column(nullable = false)
     private List<String> spectated_users = new ArrayList<>();
 
@@ -49,6 +52,14 @@ public class UserModel {
     @LastModifiedDate
     @Column
     private LocalDateTime updated_at;
+
+    @Column
+    @JsonManagedReference
+    @OneToMany(mappedBy = "author")
+    private List<BannedComment> banned_comments;
+
+    @ManyToMany(mappedBy = "users")
+    Set<BannedUser> banned_users;
 
     public UserModel() {}
 
