@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,11 +28,11 @@ public class BannedComment {
 
     @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "author", nullable = false)
+    @JoinColumn(name = "author", insertable=false, updatable=false)
     private UserModel author;
 
     @JsonBackReference
-    @ManyToOne
-    @JoinColumn(name = "banned_user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "banned_user_id")
     private BannedUser banned_user;
 }
