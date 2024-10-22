@@ -2,6 +2,8 @@ package lugzan.co.huntjavaserver.controllers.users;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import javax.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lugzan.co.huntjavaserver.models.user.UserModel;
 import lugzan.co.huntjavaserver.models.user.UserResponse;
 import lugzan.co.huntjavaserver.repository.UserRepository;
@@ -14,6 +16,7 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,7 +56,7 @@ public class UserController {
     }
 
     @PostMapping(path="/registration", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ApiDTO addNewUser (@RequestBody SignUpRequest request) {
+    public @ResponseBody ResponseEntity<ApiDTO> addNewUser (@RequestBody SignUpRequest request, HttpServletResponse response) {
         UserModel userExistName = userRepository.findByUsername(request.getEmail());
 
         if (userExistName != null) {
@@ -65,13 +68,20 @@ public class UserController {
         userRepository.save(newUser);
 
         String token = createJwtToken(newUser, request.getEmail());
-        UserResponse response = new UserResponse(newUser, token);
+        UserResponse userResponse = new UserResponse(newUser, token);
 
-        return apiService.createSuccessResponse(response);
+        Cookie cookie = new Cookie("auth-token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false);
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60);
+        response.setHeader("Set-Cookie", "auth-token=" + token + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
+
+        return apiService.createSuccessResponse(userResponse);
     }
 
     @PostMapping(path = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ApiDTO login (@RequestBody SignUpRequest request) {
+    public @ResponseBody ResponseEntity<ApiDTO> login (@RequestBody SignUpRequest request, HttpServletResponse response) {
         UserModel user = userRepository.findByUsername(request.getEmail());
         if (user == null) {
             apiService.setStatus(400);
@@ -86,13 +96,21 @@ public class UserController {
         }
 
         String token = createJwtToken(user, request.getEmail());
-        UserResponse response = new UserResponse(user, token);
+        UserResponse userResponse = new UserResponse(user, token);
 
-        return apiService.createSuccessResponse(response);
+        Cookie cookie = new Cookie("auth-token", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // Для локальной разработки
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60); // 1 день
+
+        response.setHeader("Set-Cookie", "auth-token=" + token + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
+
+        return apiService.createSuccessResponse(userResponse);
     }
 
     @GetMapping(path = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ApiDTO check (@RequestHeader(value = "Authorization", required = false) String token) {
+    public @ResponseBody ResponseEntity<ApiDTO> check (@RequestHeader(value = "Authorization", required = false) String token) {
         if (token == null || token.isEmpty()) {
             apiService.setStatus(401);
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");
@@ -122,7 +140,7 @@ public class UserController {
     }
 
     @GetMapping(path = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ApiDTO getUser (@RequestHeader(value = "Authorization", required = false) String token) {
+    public @ResponseBody ResponseEntity<ApiDTO> getUser (@RequestHeader(value = "Authorization", required = false) String token) {
         if (token == null || token.isEmpty()) {
             apiService.setStatus(401);
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");
@@ -151,7 +169,7 @@ public class UserController {
     }
 
     @PutMapping(path = "/set", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ApiDTO setUser (@RequestBody SetUserRequest request, @RequestHeader(value = "Authorization", required = false) String token) {
+    public @ResponseBody ResponseEntity<ApiDTO> setUser (@RequestBody SetUserRequest request, @RequestHeader(value = "Authorization", required = false) String token) {
         if (token == null || token.isEmpty()) {
             apiService.setStatus(401);
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");

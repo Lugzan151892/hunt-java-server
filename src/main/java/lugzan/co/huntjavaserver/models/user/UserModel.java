@@ -11,7 +11,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.List;
-import java.time.LocalDateTime;
 import java.sql.Timestamp;
 
 @Entity
@@ -64,8 +63,6 @@ public class UserModel {
     public UserModel(SignUpRequest request) {
         setPassword(request.getPassword());
         setUsername(request.getEmail());
-        // this.created_at = new Date();
-        // this.updated_at = LocalDateTime.now();
     }
 
     public Long getId() {
