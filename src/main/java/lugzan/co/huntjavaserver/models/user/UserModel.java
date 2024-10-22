@@ -5,72 +5,70 @@ import lugzan.co.huntjavaserver.controllers.users.SignUpRequest;
 import lugzan.co.huntjavaserver.models.banned_users.BannedUser;
 import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.sql.Timestamp;
 
 @Entity
-@Table(name="users")
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "users")
 public class UserModel {
-
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    @Column()
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private List<String> spectated_users = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "user_spectated_users", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "spectated_user")
+    private List<String> spectated_users;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(nullable = false)
-    @JsonAnySetter
-    private Map<String,Object> hunt_settings = new HashMap<>();
+    @Lob
+    @Column(name = "hunt_settings", columnDefinition = "TEXT")
+    private String hunt_settings;
 
     @CreatedDate
-    @Column(updatable = false)
-    private Date created_at;
+    @Column(nullable = false, updatable = false)
+    private Timestamp created_at;
 
     @LastModifiedDate
-    @Column
-    private LocalDateTime updated_at;
+    @Column(nullable = false)
+    private Timestamp updated_at;
 
-    @Column
-    @JsonManagedReference
-    @OneToMany(mappedBy = "author")
-    private List<BannedComment> banned_comments;
+    @ManyToMany
+    @JoinTable(
+        name = "user_banned_users",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "banned_user_id")
+    )
+    private List<BannedUser> banned_users;
 
-    @ManyToMany(mappedBy = "users")
-    private Set<BannedUser> banned_users;
+    @ManyToMany
+    @JoinTable(
+        name = "user_banned_comments",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "banned_comment_id")
+    )
+    private List<BannedComment> bannedComments;
 
     public UserModel() {}
 
     public UserModel(SignUpRequest request) {
         setPassword(request.getPassword());
         setUsername(request.getEmail());
-        this.created_at = new Date();
-        this.updated_at = LocalDateTime.now();
+        // this.created_at = new Date();
+        // this.updated_at = LocalDateTime.now();
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
@@ -82,11 +80,11 @@ public class UserModel {
         this.spectated_users = spectated_users;
     }
 
-    public Map<String, Object> getHunt_settings() {
+    public String getHunt_settings() {
         return hunt_settings;
     }
 
-    public void setHunt_settings(Map<String, Object> hunt_settings) {
+    public void setHunt_settings(String hunt_settings) {
         this.hunt_settings = hunt_settings;
     }
 
@@ -104,7 +102,7 @@ public class UserModel {
         this.password = bCryptPasswordEncoder.encode(password);
     }
 
-    public Date getCreated_at() {
+    public Timestamp getCreated_at() {
         return created_at;
     }
 
