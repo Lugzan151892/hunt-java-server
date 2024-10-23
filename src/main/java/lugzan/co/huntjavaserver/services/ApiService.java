@@ -1,5 +1,8 @@
 package lugzan.co.huntjavaserver.services;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 public class ApiService {
 
     private ApiDTO apiDTO;
@@ -14,22 +17,23 @@ public class ApiService {
         return apiDTO;
     }
 
-    public ApiDTO createSuccessResponse(Object data) {
+    public ResponseEntity<ApiDTO> createSuccessResponse(Object data) {
         this.status = 200;
-        return createResponse(data);
+        
+        return ResponseEntity.status(HttpStatus.OK).body(createResponse(data));
     }
 
-    public ApiDTO createErrorResponse(ApiErrorMessageEnums errorType, String value) {
+    public ResponseEntity<ApiDTO> createErrorResponse(ApiErrorMessageEnums errorType, String value) {
         ApiDTO response = new ApiDTO();
         response.setStatus(this.status);
         response.setErrorMessage(ApiErrorMessages.getErrorMessage(errorType, value));
-        return response;
+        return ResponseEntity.status(this.status).body(response);
     }
 
-    public ApiDTO createMessageResponse(String message) {
+    public ResponseEntity<ApiDTO> createMessageResponse(String message) {
         ApiDTO response = new ApiDTO();
         response.setStatus(this.status);
         response.setMessage(message);
-        return response;
+        return ResponseEntity.status(this.status).body(response);
     }
 }

@@ -1,10 +1,6 @@
 package lugzan.co.huntjavaserver.models.banned_users_comments;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,22 +13,45 @@ import lugzan.co.huntjavaserver.models.user.UserModel;
 @Entity
 @Table(name = "banned_comments")
 public class BannedComment {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-    @Column(name = "text")
     private String text;
 
-    @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "author", insertable=false, updatable=false)
+    @JoinColumn(name = "author_id", nullable = false)
     private UserModel author;
 
-    @JsonBackReference
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "banned_user_id")
+    @ManyToOne
+    @JoinColumn(name = "banned_user_id", nullable = false)
     private BannedUser banned_user;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public UserModel getAuthor() {
+        return author;
+    }
+
+    public BannedUser getBanned_user() {
+        return banned_user;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setAuthor(UserModel author) {
+        this.author = author;
+    }
+
+    public void setBanned_user(BannedUser banned_user) {
+        this.banned_user = banned_user;
+    }
 }
