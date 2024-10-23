@@ -5,12 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Cookie;
+import lugzan.co.huntjavaserver.models.refresh_token.RefreshToken;
 import lugzan.co.huntjavaserver.models.user.UserModel;
+import lugzan.co.huntjavaserver.repository.RefreshTokenRepository;
 import lugzan.co.huntjavaserver.repository.UserRepository;
-import lugzan.co.huntjavaserver.utils.PrivateVariables;
+import lugzan.co.huntjavaserver.services.jwtservice.JwtService;
 
 import java.io.IOException;
-import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,52 +20,75 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
-
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-// Твой сервис для работы с JWT
-    private final UserRepository userRepository; // Сервис для загрузки пользователей
+    private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
-    public JwtAuthenticationFilter(UserRepository userRepository) {
+    public JwtAuthenticationFilter(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository) {
         this.userRepository = userRepository;
-    }
-
-    static private Boolean isTokenExpired (String token) {
-        DecodedJWT jwt = JWT.decode(token);
-        return jwt.getExpiresAt().before(new Date());
-    }
-
-    static public Claims getTokenData (String token) {
-        return Jwts.parser()
-                .verifyWith(PrivateVariables.getSecretKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String jwtToken = extractJwtFromCookies(request);
+        String authHeader = request.getHeader("Authorization");
 
-        if (StringUtils.hasText(jwtToken) && !isTokenExpired(jwtToken)) {
-            Claims claims = getTokenData(jwtToken);
+        String accessJwtToken = null;
+        String refreshJwtToken = null;
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            accessJwtToken = authHeader.substring(7);
+        } else {
+            refreshJwtToken = extractJwtFromCookies(request);
+        }
+
+        if (StringUtils.hasText(accessJwtToken) && !JwtService.isTokenExpired(accessJwtToken)) {
+            Claims claims = JwtService.getTokenData(accessJwtToken);
 
             String userName = claims.getSubject();
 
             UserModel user = userRepository.findByUsername(userName);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, null);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            if (user != null) {
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, null);
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+    
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+    
+                String newToken = JwtService.createAccessJwtToken(user, userName);
+                response.setHeader("Authorization", "Bearer " + newToken);
+            }
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } else if (StringUtils.hasText(refreshJwtToken) && !JwtService.isTokenExpired(refreshJwtToken)) {
+            Claims claims = JwtService.getTokenData(refreshJwtToken);
+
+            String userName = claims.getSubject();
+            UserModel user = userRepository.findByUsername(userName);
+
+            if (user != null) {               
+                Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUser(user);
+
+                if (refreshToken.isPresent() && refreshJwtToken.equals(refreshToken.get().getToken()) && !JwtService.isTokenExpired(refreshToken.get().getToken())) {
+                    RefreshToken currentToken = refreshToken.get();
+
+                    String newRefreshToken = JwtService.createRefreshJwtToken(user, userName);
+                    String newAccessToken = JwtService.createAccessJwtToken(user, userName);
+                    currentToken.setToken(newRefreshToken);
+                    refreshTokenRepository.save(currentToken);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, null);
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    response.setHeader("Authorization", "Bearer " + newAccessToken);
+                    response.setHeader("Set-Cookie", "auth-token=" + newRefreshToken + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+            }
         }
-
         chain.doFilter(request, response);
     }
 

@@ -4,11 +4,14 @@ import jakarta.persistence.*;
 import lugzan.co.huntjavaserver.controllers.users.SignUpRequest;
 import lugzan.co.huntjavaserver.models.banned_users.BannedUser;
 import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
+import lugzan.co.huntjavaserver.models.refresh_token.RefreshToken;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.List;
 import java.sql.Timestamp;
@@ -25,8 +28,6 @@ public class UserModel {
 
     private String password;
 
-    @ElementCollection
-    @CollectionTable(name = "user_spectated_users", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "spectated_user")
     private List<String> spectated_users;
 
@@ -41,6 +42,10 @@ public class UserModel {
     @LastModifiedDate
     @Column(nullable = false)
     private Timestamp updated_at;
+
+    @JsonManagedReference
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private RefreshToken refreshToken;
 
     @ManyToMany
     @JoinTable(
@@ -101,6 +106,14 @@ public class UserModel {
 
     public Timestamp getCreated_at() {
         return created_at;
+    }
+
+    public RefreshToken getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(RefreshToken refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     public Boolean checkPassword(String password) {
