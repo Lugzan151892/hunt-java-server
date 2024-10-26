@@ -59,7 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     
                 SecurityContextHolder.getContext().setAuthentication(authentication);
     
-                String newToken = JwtService.createAccessJwtToken(user, userName);
+                String newToken = JwtService.createAccessJwtToken(user.getId(), userName);
                 response.setHeader("Authorization", "Bearer " + newToken);
             }
 
@@ -75,8 +75,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (refreshToken.isPresent() && refreshJwtToken.equals(refreshToken.get().getToken()) && !JwtService.isTokenExpired(refreshToken.get().getToken())) {
                     RefreshToken currentToken = refreshToken.get();
 
-                    String newRefreshToken = JwtService.createRefreshJwtToken(user, userName);
-                    String newAccessToken = JwtService.createAccessJwtToken(user, userName);
+                    String newRefreshToken = JwtService.createRefreshJwtToken(user.getId(), userName);
+                    String newAccessToken = JwtService.createAccessJwtToken(user.getId(), userName);
                     currentToken.setToken(newRefreshToken);
                     refreshTokenRepository.save(currentToken);
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, null);

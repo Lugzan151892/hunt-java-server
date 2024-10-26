@@ -91,7 +91,6 @@ public class UserController {
     @GetMapping(path = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ResponseEntity<ApiDTO> getUser () {
         UserModel user = null;
-
         
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         

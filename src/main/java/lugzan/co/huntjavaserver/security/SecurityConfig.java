@@ -37,8 +37,8 @@ public class SecurityConfig {
             var corsConfiguration = new CorsConfiguration();
             corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
             corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-            corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-            corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie"));
+            corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+            corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Content-Type"));
             corsConfiguration.setAllowCredentials(true);
             return corsConfiguration;
         }))
