@@ -18,7 +18,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 public class JwtService {
 
     private static final String SECRET_KEY = "myPythonSecretKeyForDatabaseOnServerLocalmyPythonSecretKeyForDatabaseOnServerLocalmyPythonSecretKeyForDatabaseOnServerLocal";
-    private static final int millisecondsInHour = 60000 * 60;
+    private static final int millisecondsInMinute = 60000;
+    private static final int millisecondsInHour = millisecondsInMinute * 60;
 
     static public SecretKey getSecretKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
@@ -42,7 +43,7 @@ public class JwtService {
         return Jwts.builder()
                 .claim("user", data)
                 .subject(userName)
-                .expiration(new Date(System.currentTimeMillis() + millisecondsInHour * 10))
+                .expiration(new Date(System.currentTimeMillis() + millisecondsInMinute * 5))
                 .signWith(getSecretKey())
                 .compact();
     }
