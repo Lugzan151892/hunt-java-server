@@ -94,7 +94,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        chain.doFilter(request, response);
     }
 
     private String extractJwtFromCookies(HttpServletRequest request) {

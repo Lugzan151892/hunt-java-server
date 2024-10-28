@@ -76,7 +76,7 @@ public class UserController {
 
         String newAccessToken = JwtService.createAccessJwtToken(user.getId(), user.getUsername());
         response.setHeader("Authorization", newAccessToken);
-        response.setHeader("Set-Cookie", "auth-token=" + user.getRefreshToken().getToken() + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
+        response.setHeader("Set-Cookie", "auth-token=" + refreshToken.getToken() + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
 
         return apiService.createSuccessResponse(user);
     }
@@ -128,7 +128,7 @@ public class UserController {
         }
 
         if (user == null) {
-            apiService.setStatus(403);
+            apiService.setStatus(401);
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_EXPIRED, "");
         }
 

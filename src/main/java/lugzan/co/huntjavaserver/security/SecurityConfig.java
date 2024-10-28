@@ -1,7 +1,6 @@
 package lugzan.co.huntjavaserver.security;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,8 +35,8 @@ public class SecurityConfig {
         )
         .cors(cors -> cors.configurationSource(request -> {
             var corsConfiguration = new CorsConfiguration();
-            corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-            corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+            corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8000"));
+            corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
             corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization", "Content-Type"));
             corsConfiguration.setAllowCredentials(true);
@@ -46,9 +45,6 @@ public class SecurityConfig {
         .exceptionHandling((exceptionHandling) -> exceptionHandling
             .authenticationEntryPoint((request, response, authException) -> {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-            })
-            .accessDeniedHandler((request, response, accessDeniedException) -> {
-                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
             })
         )
         .addFilterBefore(new JwtAuthenticationFilter(userRepository, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class);
