@@ -71,9 +71,7 @@ public class UserController {
         } else {
             String newToken = JwtService.createRefreshJwtToken(user.getId(), user.getUsername());
             RefreshToken newRefreshToken = new RefreshToken(newToken, user);
-            user.setRefreshToken(newRefreshToken);
             refreshTokenRepository.save(newRefreshToken);
-            userRepository.save(user);
         }
 
         String newAccessToken = JwtService.createAccessJwtToken(user.getId(), user.getUsername());
