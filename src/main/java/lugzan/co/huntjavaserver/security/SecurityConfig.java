@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lugzan.co.huntjavaserver.repository.RefreshTokenRepository;
 import lugzan.co.huntjavaserver.repository.UserRepository;
 
@@ -30,7 +31,7 @@ public class SecurityConfig {
         http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests((requests) -> requests
-            .requestMatchers("/api/user/login", "/api/user/registration").permitAll()
+            .requestMatchers("/api/user/login", "/api/user/registration", "/api/user/logout").permitAll()
             .anyRequest().authenticated()
         )
         .cors(cors -> cors.configurationSource(request -> {
@@ -38,10 +39,18 @@ public class SecurityConfig {
             corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
             corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
             corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
-            corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Content-Type"));
+            corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization", "Content-Type"));
             corsConfiguration.setAllowCredentials(true);
             return corsConfiguration;
         }))
+        .exceptionHandling((exceptionHandling) -> exceptionHandling
+            .authenticationEntryPoint((request, response, authException) -> {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            })
+            .accessDeniedHandler((request, response, accessDeniedException) -> {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+            })
+        )
         .addFilterBefore(new JwtAuthenticationFilter(userRepository, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

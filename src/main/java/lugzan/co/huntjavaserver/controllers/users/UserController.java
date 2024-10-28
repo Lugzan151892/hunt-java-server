@@ -41,6 +41,8 @@ public class UserController {
         userRepository.save(newUser);
         RefreshToken refreshToken = new RefreshToken(JwtService.createRefreshJwtToken(newUser, newUser.getUsername()), newUser);
         refreshTokenRepository.save(refreshToken);
+        String newAccessToken = JwtService.createAccessJwtToken(newUser.getId(), newUser.getUsername());
+        response.setHeader("Authorization", newAccessToken);
         response.setHeader("Set-Cookie", "auth-token=" + refreshToken.getToken() + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
 
         return apiService.createSuccessResponse(newUser);
@@ -62,9 +64,20 @@ public class UserController {
         }
 
         RefreshToken refreshToken = user.getRefreshToken();
-        refreshToken.updateToken(user, user.getUsername());
-        refreshTokenRepository.save(refreshToken);
 
+        if (refreshToken != null) {
+            refreshToken.updateToken(user.getId(), user.getUsername());
+            refreshTokenRepository.save(refreshToken);
+        } else {
+            String newToken = JwtService.createRefreshJwtToken(user.getId(), user.getUsername());
+            RefreshToken newRefreshToken = new RefreshToken(newToken, user);
+            user.setRefreshToken(newRefreshToken);
+            refreshTokenRepository.save(newRefreshToken);
+            userRepository.save(user);
+        }
+
+        String newAccessToken = JwtService.createAccessJwtToken(user.getId(), user.getUsername());
+        response.setHeader("Authorization", newAccessToken);
         response.setHeader("Set-Cookie", "auth-token=" + user.getRefreshToken().getToken() + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
 
         return apiService.createSuccessResponse(user);
@@ -126,5 +139,30 @@ public class UserController {
         userRepository.save(user);
 
         return apiService.createSuccessResponse(user);
+    }
+
+    @PostMapping(path = "/logout", produces = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody ResponseEntity<ApiDTO> logoutUser(@RequestBody String userName) {
+        UserModel user = null;
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            user = (UserModel) authentication.getPrincipal();
+        }
+
+        if (user == null) {
+            user = userRepository.findByUsername(userName);
+        }
+
+        if (user == null) {
+            apiService.setStatus(403);
+            return apiService.createErrorResponse(ApiErrorMessageEnums.USER_NOT_FOUND, "");
+        }
+
+        user.setRefreshToken(null);
+        userRepository.save(user);
+
+        return apiService.createSuccessResponse("");
     }
 }
