@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.List;
+import java.util.Map;
 import java.sql.Timestamp;
 
 @Entity
@@ -33,7 +34,8 @@ public class UserModel {
 
     @Lob
     @Column(name = "hunt_settings", columnDefinition = "TEXT")
-    private String hunt_settings;
+    @Convert(converter = HuntSettingsConverter.class)
+    private Map<String, Object> hunt_settings;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -82,11 +84,11 @@ public class UserModel {
         this.spectated_users = spectated_users;
     }
 
-    public String getHunt_settings() {
+    public Map<String, Object> getHunt_settings() {
         return hunt_settings;
     }
 
-    public void setHunt_settings(String hunt_settings) {
+    public void setHunt_settings(Map<String, Object> hunt_settings) {
         this.hunt_settings = hunt_settings;
     }
 

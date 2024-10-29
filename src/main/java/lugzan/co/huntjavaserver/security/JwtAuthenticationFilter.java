@@ -60,9 +60,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
     
                 String newToken = JwtService.createAccessJwtToken(user.getId(), userName);
-                response.setHeader("Authorization", "Bearer " + newToken);
-            }
+                response.setHeader("Authorization", newToken);
 
+                chain.doFilter(request, response);
+                return;
+            }
         } else if (StringUtils.hasText(refreshJwtToken) && !JwtService.isTokenExpired(refreshJwtToken)) {
             Claims claims = JwtService.getTokenData(refreshJwtToken);
 
@@ -82,10 +84,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, null);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    response.setHeader("Authorization", "Bearer " + newAccessToken);
+                    response.setHeader("Authorization", newAccessToken);
                     response.setHeader("Set-Cookie", "auth-token=" + newRefreshToken + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    chain.doFilter(request, response);
+                    return;
                 }
             }
         }
