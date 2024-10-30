@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lugzan.co.huntjavaserver.services.enviromentvariables.EnviromentVariables;
 
 import java.util.Date;
 
@@ -16,13 +17,11 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 @Service
 public class JwtService {
-
-    private static final String SECRET_KEY = "myPythonSecretKeyForDatabaseOnServerLocalmyPythonSecretKeyForDatabaseOnServerLocalmyPythonSecretKeyForDatabaseOnServerLocal";
     private static final int millisecondsInMinute = 60000;
     private static final int millisecondsInHour = millisecondsInMinute * 60;
 
     static public SecretKey getSecretKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(EnviromentVariables.getJwtSecretKey());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
