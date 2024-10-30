@@ -25,7 +25,7 @@ public class BannedUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "steam_id")
+    @Column(name = "steam_id", nullable = false)
     private Integer steam_id;
 
     @Column(name = "created_at", updatable = false)
