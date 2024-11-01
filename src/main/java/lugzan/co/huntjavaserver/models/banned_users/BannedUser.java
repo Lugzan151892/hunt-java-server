@@ -1,7 +1,13 @@
 package lugzan.co.huntjavaserver.models.banned_users;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -10,10 +16,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
 import lugzan.co.huntjavaserver.models.user.UserModel;
 
@@ -26,44 +30,59 @@ public class BannedUser {
     private Long id;
 
     @Column(name = "steam_id", nullable = false)
-    private Integer steam_id;
+    private String steamId;
 
-    @Column(name = "created_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    @CreatedDate
+    @Column(nullable = false, updatable = false)
+    private Timestamp createdAt;
 
-    @OneToMany(mappedBy = "banned_user", cascade = CascadeType.ALL)
-    private List<BannedComment> comments;
+    @LastModifiedDate
+    @Column(nullable = false)
+    private Timestamp updatedAt;
 
+    @OneToOne(mappedBy = "banned_user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private BannedComment comment;
+
+    @JsonManagedReference
     @ManyToMany(mappedBy = "banned_users")
     private List<UserModel> users;
+
+    public BannedUser() {}
+
+    public BannedUser(String steamId) {
+        setSteamId(steamId);
+    }
 
     public Long getId() {
         return id;
     }
 
-    public Integer getSteam_id() {
-        return steam_id;
+    public String getSteamId() {
+        return steamId;
     }
 
     public Date getCreatedAt() {
         return createdAt;
     }
 
-    public List<BannedComment> getComments() {
-        return comments;
+    public BannedComment getComment() {
+        return comment;
     }
 
     public List<UserModel> getUsers() {
         return users;
     }
 
-    public void setSteam_id(Integer steam_id) {
-        this.steam_id = steam_id;
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setComments(List<BannedComment> comments) {
-        this.comments = comments;
+    public void setSteamId(String steam_id) {
+        this.steamId = steam_id;
+    }
+
+    public void setComments(BannedComment comment) {
+        this.comment = comment;
     }
 
     public void setUsers(List<UserModel> users) {

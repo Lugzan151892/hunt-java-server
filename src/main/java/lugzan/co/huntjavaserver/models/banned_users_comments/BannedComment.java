@@ -1,11 +1,14 @@
 package lugzan.co.huntjavaserver.models.banned_users_comments;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lugzan.co.huntjavaserver.models.banned_users.BannedUser;
 import lugzan.co.huntjavaserver.models.user.UserModel;
@@ -23,7 +26,9 @@ public class BannedComment {
     @JoinColumn(name = "author_id", nullable = false)
     private UserModel author;
 
-    @ManyToOne
+
+    @JsonBackReference
+    @OneToOne
     @JoinColumn(name = "banned_user_id", nullable = false)
     private BannedUser banned_user;
 
