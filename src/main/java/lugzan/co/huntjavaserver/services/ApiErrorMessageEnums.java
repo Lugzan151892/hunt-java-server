@@ -9,4 +9,5 @@ public enum ApiErrorMessageEnums {
     TOKEN_INCORRECT,
     STEAM_PATH_INVALID,
     STEAM_ID_FINDER_FAILED,
+    BANNED_USER_EXIST,
 }

@@ -1,7 +1,6 @@
 package lugzan.co.huntjavaserver.controllers.users;
 
 import jakarta.servlet.http.HttpServletResponse;
-import lugzan.co.huntjavaserver.controllers.users.dto.AddBannedRequest;
 import lugzan.co.huntjavaserver.controllers.users.dto.SetUserRequest;
 import lugzan.co.huntjavaserver.controllers.users.dto.SignUpRequest;
 import lugzan.co.huntjavaserver.models.refresh_token.RefreshToken;

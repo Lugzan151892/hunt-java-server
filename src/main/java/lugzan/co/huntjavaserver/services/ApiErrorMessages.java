@@ -28,6 +28,9 @@ public class ApiErrorMessages {
             case STEAM_ID_FINDER_FAILED -> {
                 return "Steam id with this path not found. Check path and try again";
             }
+            case BANNED_USER_EXIST -> {
+                return "This user already added, check your list";
+            }
             default -> {
                 return "Unexpected error occurred. Please try again.";
             }

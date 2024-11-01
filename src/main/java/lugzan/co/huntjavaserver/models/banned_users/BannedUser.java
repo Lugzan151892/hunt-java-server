@@ -2,26 +2,28 @@ package lugzan.co.huntjavaserver.models.banned_users;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
+import jakarta.persistence.Transient;
+import lugzan.co.huntjavaserver.controllers.banned_users.dto.AddBannedRequest;
 import lugzan.co.huntjavaserver.models.user.UserModel;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "banned_users")
 public class BannedUser {
 
@@ -33,24 +35,69 @@ public class BannedUser {
     private String steamId;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private Timestamp createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(name = "updated_at",nullable = false)
     private Timestamp updatedAt;
 
-    @OneToOne(mappedBy = "banned_user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private BannedComment comment;
+    private String comment = "";
 
-    @JsonManagedReference
-    @ManyToMany(mappedBy = "banned_users")
-    private List<UserModel> users;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private UserModel user;
+
+    /** Не записываем в БД */
+    @Transient
+    private Integer communityVisibilityState;
+
+    @Transient
+    private Integer profileState;
+
+    @Transient
+    private String personaName;
+
+    @Transient
+    private String profileUrl;
+
+    @Transient
+    private String avatarMedium;
+
+    @Transient
+    private String avatarFull;
+
+    @Transient
+    private Integer commentPermission;
+
+    @Transient
+    private String avatar;
+
+    @Transient
+    private Integer lastlogoff;
+
+    @Transient
+    private String primaryclanid;
+
+    @Transient
+    private Integer timecreated;
+
+    @Transient
+    private Integer personastateflags;
+
 
     public BannedUser() {}
 
-    public BannedUser(String steamId) {
+    public BannedUser(String steamId, UserModel user) {
         setSteamId(steamId);
+        setUser(user);
+    }
+
+    public BannedUser(AddBannedRequest request, UserModel user) {
+        setSteamId(request.getSteamId());
+        setUser(user);
+        setComment(request.getComment());
     }
 
     public Long getId() {
@@ -65,27 +112,123 @@ public class BannedUser {
         return createdAt;
     }
 
-    public BannedComment getComment() {
-        return comment;
-    }
-
-    public List<UserModel> getUsers() {
-        return users;
-    }
-
     public Timestamp getUpdatedAt() {
         return updatedAt;
+    }
+
+    public UserModel getUser() {
+        return user;
+    }
+
+    public String getComment() {
+        return comment;
     }
 
     public void setSteamId(String steam_id) {
         this.steamId = steam_id;
     }
 
-    public void setComments(BannedComment comment) {
+    public void setUser(UserModel user) {
+        this.user = user;
+    }
+
+    public void setComment(String comment) {
         this.comment = comment;
     }
 
-    public void setUsers(List<UserModel> users) {
-        this.users = users;
+    /** Поля не записанные в БД */
+    public String getAvatarFull() {
+        return avatarFull;
+    }
+
+    public void setAvatarFull(String avatarFull) {
+        this.avatarFull = avatarFull;
+    }
+
+    public String getAvatarMedium() {
+        return avatarMedium;
+    }
+
+    public void setAvatarMedium(String avatarMedium) {
+        this.avatarMedium = avatarMedium;
+    }
+
+    public Integer getCommunityVisibilityState() {
+        return communityVisibilityState;
+    }
+
+    public void setCommunityVisibilityState(Integer communityVisibilityState) {
+        this.communityVisibilityState = communityVisibilityState;
+    }
+
+    public String getPersonaName() {
+        return personaName;
+    }
+    public void setPersonaName(String personaName) {
+        this.personaName = personaName;
+    }
+
+    public String getProfileUrl() {
+        return profileUrl;
+    }
+
+    public void setProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
+
+    public Integer getProfileState() {
+        return profileState;
+    }
+
+    public void setProfileState(Integer profileState) {
+        this.profileState = profileState;
+    }
+
+    public Integer getCommentPermission() {
+        return commentPermission;
+    }
+
+    public void setCommentPermission(Integer commentPermission) {
+        this.commentPermission = commentPermission;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Integer getLastlogoff() {
+        return lastlogoff;
+    }
+
+    public void setLastlogoff(Integer lastlogoff) {
+        this.lastlogoff = lastlogoff;
+    }
+
+    public Integer getPersonastateflags() {
+        return personastateflags;
+    }
+
+    public void setPersonastateflags(Integer personastateflags) {
+        this.personastateflags = personastateflags;
+    }
+
+    public String getPrimaryclanid() {
+        return primaryclanid;
+    }
+
+    public void setPrimaryclanid(String primaryclanid) {
+        this.primaryclanid = primaryclanid;
+    }
+
+    public Integer getTimecreated() {
+        return timecreated;
+    }
+
+    public void setTimecreated(Integer timecreated) {
+        this.timecreated = timecreated;
     }
 }
