@@ -25,6 +25,7 @@ public class SecurityConfig {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
+    @SuppressWarnings("unused")
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http

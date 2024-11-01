@@ -3,7 +3,6 @@ package lugzan.co.huntjavaserver.models.user;
 import jakarta.persistence.*;
 import lugzan.co.huntjavaserver.controllers.users.dto.SignUpRequest;
 import lugzan.co.huntjavaserver.models.banned_users.BannedUser;
-import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
 import lugzan.co.huntjavaserver.models.refresh_token.RefreshToken;
 
 import org.springframework.data.annotation.CreatedDate;
@@ -11,7 +10,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.List;
@@ -31,41 +29,28 @@ public class UserModel {
     private String password;
 
     @Column(name = "spectated_user")
-    private List<String> spectated_users;
+    private List<String> spectatedUsers;
 
     @Lob
     @Column(name = "hunt_settings", columnDefinition = "TEXT")
     @Convert(converter = HuntSettingsConverter.class)
-    private Map<String, Object> hunt_settings;
+    private Map<String, Object> huntSettings;
 
     @CreatedDate
-    @Column(nullable = false, updatable = false)
-    private Timestamp created_at;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
-    private Timestamp updated_at;
+    @Column(name = "updated_at", nullable = false)
+    private Timestamp updatedAt;
 
     @JsonManagedReference
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private RefreshToken refreshToken;
 
-    @ManyToMany
-    @JoinTable(
-        name = "user_banned_users",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "banned_user_id")
-    )
-    @JsonBackReference
-    private List<BannedUser> banned_users;
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_banned_comments",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "banned_comment_id")
-    )
-    private List<BannedComment> bannedComments;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<BannedUser> bannedUsers;
 
     public UserModel() {}
 
@@ -78,20 +63,20 @@ public class UserModel {
         return id;
     }
 
-    public List<String> getSpectated_users() {
-        return spectated_users;
+    public List<String> getSpectatedUsers() {
+        return spectatedUsers;
     }
 
-    public void setSpectated_users(List<String> spectated_users) {
-        this.spectated_users = spectated_users;
+    public void setSpectatedUsers(List<String> spectatedUsers) {
+        this.spectatedUsers = spectatedUsers;
     }
 
-    public Map<String, Object> getHunt_settings() {
-        return hunt_settings;
+    public Map<String, Object> getHuntSettings() {
+        return huntSettings;
     }
 
-    public void setHunt_settings(Map<String, Object> hunt_settings) {
-        this.hunt_settings = hunt_settings;
+    public void setHuntSettings(Map<String, Object> huntSettings) {
+        this.huntSettings = huntSettings;
     }
 
     public String getUsername() {
@@ -108,8 +93,12 @@ public class UserModel {
         this.password = bCryptPasswordEncoder.encode(password);
     }
 
-    public Timestamp getCreated_at() {
-        return created_at;
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
     }
 
     public RefreshToken getRefreshToken() {
@@ -125,11 +114,11 @@ public class UserModel {
         return bCryptPasswordEncoder.matches(password, this.password);
     }
 
-    public List<BannedUser> getBanned_users() {
-        return banned_users;
+    public List<BannedUser> getBannedUsers() {
+        return bannedUsers;
     }
 
-    public void setBanned_users(List<BannedUser> banned_users) {
-        this.banned_users = banned_users;
+    public void setBannedUsers(List<BannedUser> bannedUsers) {
+        this.bannedUsers = bannedUsers;
     }
 }
