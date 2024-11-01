@@ -86,6 +86,8 @@ public class BannedUser {
     @Transient
     private Integer personastateflags;
 
+    @Transient
+    private Boolean banned;
 
     public BannedUser() {}
 
@@ -230,5 +232,13 @@ public class BannedUser {
 
     public void setTimecreated(Integer timecreated) {
         this.timecreated = timecreated;
+    }
+
+    public Boolean getBanned() {
+        return banned;
+    }
+
+    public void setBanned(Boolean banned) {
+        this.banned = banned;
     }
 }

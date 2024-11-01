@@ -37,6 +37,17 @@ public class SteamService {
         }
     }
 
+    public static boolean isProfileBanned(String url) {
+        try {
+            Document doc = Jsoup.connect(url).get();
+            String html = doc.html();
+            return html.contains("class=\"profile_ban_info\"");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static List<SteamPlayer> getSteamUserData(List<String> steamIds, RestTemplate restTemplate) {
         String steamIdList = String.join(",", steamIds.stream().map(String::valueOf).toArray(String[]::new));
         String apiUrl = EnviromentVariables.getSteamApiUrl() + "?key=" + EnviromentVariables.getSteamApiKey() + "&steamids=" + steamIdList;

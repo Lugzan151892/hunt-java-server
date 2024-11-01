@@ -29,12 +29,12 @@ public class UserModel {
     private String password;
 
     @Column(name = "spectated_user")
-    private List<String> spectated_users;
+    private List<String> spectatedUsers;
 
     @Lob
     @Column(name = "hunt_settings", columnDefinition = "TEXT")
     @Convert(converter = HuntSettingsConverter.class)
-    private Map<String, Object> hunt_settings;
+    private Map<String, Object> huntSettings;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -63,20 +63,20 @@ public class UserModel {
         return id;
     }
 
-    public List<String> getSpectated_users() {
-        return spectated_users;
+    public List<String> getSpectatedUsers() {
+        return spectatedUsers;
     }
 
-    public void setSpectated_users(List<String> spectated_users) {
-        this.spectated_users = spectated_users;
+    public void setSpectatedUsers(List<String> spectatedUsers) {
+        this.spectatedUsers = spectatedUsers;
     }
 
-    public Map<String, Object> getHunt_settings() {
-        return hunt_settings;
+    public Map<String, Object> getHuntSettings() {
+        return huntSettings;
     }
 
-    public void setHunt_settings(Map<String, Object> hunt_settings) {
-        this.hunt_settings = hunt_settings;
+    public void setHuntSettings(Map<String, Object> huntSettings) {
+        this.huntSettings = huntSettings;
     }
 
     public String getUsername() {

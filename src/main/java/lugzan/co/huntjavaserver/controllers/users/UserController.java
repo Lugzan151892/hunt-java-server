@@ -3,8 +3,10 @@ package lugzan.co.huntjavaserver.controllers.users;
 import jakarta.servlet.http.HttpServletResponse;
 import lugzan.co.huntjavaserver.controllers.users.dto.SetUserRequest;
 import lugzan.co.huntjavaserver.controllers.users.dto.SignUpRequest;
+import lugzan.co.huntjavaserver.models.banned_users.BannedUser;
 import lugzan.co.huntjavaserver.models.refresh_token.RefreshToken;
 import lugzan.co.huntjavaserver.models.user.UserModel;
+import lugzan.co.huntjavaserver.repository.BannedUserRepository;
 import lugzan.co.huntjavaserver.repository.RefreshTokenRepository;
 import lugzan.co.huntjavaserver.repository.UserRepository;
 import lugzan.co.huntjavaserver.services.ApiService;
@@ -12,6 +14,8 @@ import lugzan.co.huntjavaserver.services.jwtservice.JwtService;
 import lugzan.co.huntjavaserver.services.ApiDTO;
 import lugzan.co.huntjavaserver.services.ApiErrorMessageEnums;
 import org.springframework.security.core.Authentication;
+
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -28,6 +32,8 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
+    @Autowired
+    private BannedUserRepository bannedUserRepository;
     private final static ApiService apiService = new ApiService();
 
     private UserModel getUserFromAuth() {
@@ -104,6 +110,19 @@ public class UserController {
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_EXPIRED, "");
         }
 
+        if (user.getSpectatedUsers() != null && !user.getSpectatedUsers().isEmpty()) {
+            for (String steamId : user.getSpectatedUsers()) {
+                if (bannedUserRepository.findBySteamIdAndUser(steamId, user).isEmpty()) {
+                    BannedUser bannedUser = new BannedUser(steamId, user);
+
+                    bannedUserRepository.save(bannedUser);
+                }
+            }
+
+            user.setSpectatedUsers(new ArrayList<>());
+            userRepository.save(user);
+        }
+
         return apiService.createSuccessResponse(user);
     }
 
@@ -122,8 +141,8 @@ public class UserController {
             return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_EXPIRED, "");
         }
 
-        user.setHunt_settings(request.getHunt_settings());
-        user.setSpectated_users(request.getSpectated_users());
+        user.setHuntSettings(request.getHunt_settings());
+        user.setSpectatedUsers(request.getSpectated_users());
         userRepository.save(user);
 
         return apiService.createSuccessResponse(user);
@@ -153,29 +172,4 @@ public class UserController {
 
         return apiService.createSuccessResponse("");
     }
-
-    // @PostMapping(path = "/banned/add", produces = MediaType.APPLICATION_JSON_VALUE)
-    // public @ResponseBody ResponseEntity<ApiDTO> addBannedUser(@RequestBody AddBannedRequest request) {
-    //     UserModel user = null;
-
-    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    //     if (authentication != null && authentication.isAuthenticated()) {
-    //         user = (UserModel) authentication.getPrincipal();
-    //     }
-
-    //     if (user == null) {
-    //         user = userRepository.findByUsername(userName);
-    //     }
-
-    //     if (user == null) {
-    //         apiService.setStatus(403);
-    //         return apiService.createErrorResponse(ApiErrorMessageEnums.USER_NOT_FOUND, "");
-    //     }
-
-    //     user.setRefreshToken(null);
-    //     userRepository.save(user);
-
-    //     return apiService.createSuccessResponse("");
-    // }
 }

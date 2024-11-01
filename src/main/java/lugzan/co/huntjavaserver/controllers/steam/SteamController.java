@@ -89,6 +89,7 @@ public class SteamController {
                     bannedUser.setPrimaryclanid(player.getPrimaryclanid());
                     bannedUser.setTimecreated(player.getTimecreated());
                     bannedUser.setPersonastateflags(player.getPersonastateflags());
+                    bannedUser.setBanned(SteamService.isProfileBanned(player.getProfileUrl()));
                 }
             }
         }
