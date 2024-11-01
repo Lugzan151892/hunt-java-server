@@ -1,7 +1,7 @@
 package lugzan.co.huntjavaserver.models.user;
 
 import jakarta.persistence.*;
-import lugzan.co.huntjavaserver.controllers.users.SignUpRequest;
+import lugzan.co.huntjavaserver.controllers.users.dto.SignUpRequest;
 import lugzan.co.huntjavaserver.models.banned_users.BannedUser;
 import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
 import lugzan.co.huntjavaserver.models.refresh_token.RefreshToken;
@@ -11,6 +11,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.util.List;
@@ -55,6 +56,7 @@ public class UserModel {
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "banned_user_id")
     )
+    @JsonBackReference
     private List<BannedUser> banned_users;
 
     @ManyToMany
@@ -121,5 +123,13 @@ public class UserModel {
     public Boolean checkPassword(String password) {
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
         return bCryptPasswordEncoder.matches(password, this.password);
+    }
+
+    public List<BannedUser> getBanned_users() {
+        return banned_users;
+    }
+
+    public void setBanned_users(List<BannedUser> banned_users) {
+        this.banned_users = banned_users;
     }
 }

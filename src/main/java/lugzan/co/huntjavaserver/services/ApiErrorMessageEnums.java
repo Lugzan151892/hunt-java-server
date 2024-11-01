@@ -7,4 +7,6 @@ public enum ApiErrorMessageEnums {
     TOKEN_EXPIRED,
     PASSWORD_INCORRECT,
     TOKEN_INCORRECT,
+    STEAM_PATH_INVALID,
+    STEAM_ID_FINDER_FAILED,
 }

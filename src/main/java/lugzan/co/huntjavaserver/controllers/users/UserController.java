@@ -1,6 +1,9 @@
 package lugzan.co.huntjavaserver.controllers.users;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lugzan.co.huntjavaserver.controllers.users.dto.AddBannedRequest;
+import lugzan.co.huntjavaserver.controllers.users.dto.SetUserRequest;
+import lugzan.co.huntjavaserver.controllers.users.dto.SignUpRequest;
 import lugzan.co.huntjavaserver.models.refresh_token.RefreshToken;
 import lugzan.co.huntjavaserver.models.user.UserModel;
 import lugzan.co.huntjavaserver.repository.RefreshTokenRepository;
@@ -27,6 +30,18 @@ public class UserController {
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;
     private final static ApiService apiService = new ApiService();
+
+    private UserModel getUserFromAuth() {
+        UserModel user = null;
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null && authentication.isAuthenticated()) {
+            user = (UserModel) authentication.getPrincipal();
+        }
+
+        return user;
+    }
 
     @PostMapping(path="/registration", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ResponseEntity<ApiDTO> addNewUser (@RequestBody SignUpRequest request, HttpServletResponse response) {
@@ -81,33 +96,9 @@ public class UserController {
         return apiService.createSuccessResponse(user);
     }
 
-    @GetMapping(path = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody ResponseEntity<ApiDTO> check () {
-        UserModel user = null;
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication != null && authentication.isAuthenticated()) {
-            user = (UserModel) authentication.getPrincipal();
-        }
-
-        if (user == null) {
-            apiService.setStatus(401);
-            return apiService.createErrorResponse(ApiErrorMessageEnums.TOKEN_INCORRECT, "");
-        }
-
-        return apiService.createSuccessResponse(user);
-    }
-
     @GetMapping(path = "/get", produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody ResponseEntity<ApiDTO> getUser () {
-        UserModel user = null;
-        
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication != null && authentication.isAuthenticated()) {
-            user = (UserModel) authentication.getPrincipal();
-        }
+        UserModel user = getUserFromAuth();
         
         if (user == null) {
             apiService.setStatus(403);
@@ -163,4 +154,29 @@ public class UserController {
 
         return apiService.createSuccessResponse("");
     }
+
+    // @PostMapping(path = "/banned/add", produces = MediaType.APPLICATION_JSON_VALUE)
+    // public @ResponseBody ResponseEntity<ApiDTO> addBannedUser(@RequestBody AddBannedRequest request) {
+    //     UserModel user = null;
+
+    //     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    //     if (authentication != null && authentication.isAuthenticated()) {
+    //         user = (UserModel) authentication.getPrincipal();
+    //     }
+
+    //     if (user == null) {
+    //         user = userRepository.findByUsername(userName);
+    //     }
+
+    //     if (user == null) {
+    //         apiService.setStatus(403);
+    //         return apiService.createErrorResponse(ApiErrorMessageEnums.USER_NOT_FOUND, "");
+    //     }
+
+    //     user.setRefreshToken(null);
+    //     userRepository.save(user);
+
+    //     return apiService.createSuccessResponse("");
+    // }
 }

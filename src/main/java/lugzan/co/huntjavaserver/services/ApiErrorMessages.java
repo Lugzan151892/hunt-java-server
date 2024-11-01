@@ -22,6 +22,12 @@ public class ApiErrorMessages {
             case TOKEN_INCORRECT -> {
                 return "Token incorrect";
             }
+            case STEAM_PATH_INVALID -> {
+                return "Steam path invalid";
+            }
+            case STEAM_ID_FINDER_FAILED -> {
+                return "Steam id with this path not found. Check path and try again";
+            }
             default -> {
                 return "Unexpected error occurred. Please try again.";
             }

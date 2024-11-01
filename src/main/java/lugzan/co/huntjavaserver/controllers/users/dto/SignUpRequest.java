@@ -1,4 +1,4 @@
-package lugzan.co.huntjavaserver.controllers.users;
+package lugzan.co.huntjavaserver.controllers.users.dto;
 
 public class SignUpRequest {
     private String email;
