@@ -4,13 +4,13 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lugzan.co.huntjavaserver.repository.RefreshTokenRepository;
 import lugzan.co.huntjavaserver.repository.UserRepository;
 
@@ -43,10 +43,22 @@ public class SecurityConfig {
             corsConfiguration.setAllowCredentials(true);
             return corsConfiguration;
         }))
-        .exceptionHandling((exceptionHandling) -> exceptionHandling
-            .authenticationEntryPoint((request, response, authException) -> {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-            })
+        // .exceptionHandling((exceptionHandling) -> exceptionHandling
+            // .authenticationEntryPoint((request, response, authException) -> {
+            //     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            // })
+            // .authenticationEntryPoint((request, response, authException) -> {
+            //     if (authException instanceof AuthenticationException) {
+            //         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            //     } else {
+            //         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+            //     }
+            // })
+        // )
+        .exceptionHandling(exceptionHandling -> exceptionHandling
+            .authenticationEntryPoint((request, response, authException) -> 
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized")
+            )
         )
         .addFilterBefore(new JwtAuthenticationFilter(userRepository, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class);
 
