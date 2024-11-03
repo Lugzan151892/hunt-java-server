@@ -44,6 +44,9 @@ public class SteamPlayer {
     @JsonProperty("personastateflags")
     private Integer personastateflags;
 
+    @JsonProperty("personastate")
+    private Integer personastate;
+
     public String getSteamId() {
         return steamId;
     }
@@ -146,5 +149,13 @@ public class SteamPlayer {
 
     public void setTimecreated(Integer timecreated) {
         this.timecreated = timecreated;
+    }
+
+    public Integer getPersonastate() {
+        return personastate;
+    }
+
+    public void setPersonastate(Integer personastate) {
+        this.personastate = personastate;
     }
 }

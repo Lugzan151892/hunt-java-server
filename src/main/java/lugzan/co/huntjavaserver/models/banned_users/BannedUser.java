@@ -89,6 +89,9 @@ public class BannedUser {
     @Transient
     private Boolean banned;
 
+    @Transient
+    private Integer personastate;
+
     public BannedUser() {}
 
     public BannedUser(String steamId, UserModel user) {
@@ -240,5 +243,13 @@ public class BannedUser {
 
     public void setBanned(Boolean banned) {
         this.banned = banned;
+    }
+
+    public Integer getPersonastate() {
+        return personastate;
+    }
+
+    public void setPersonastate(Integer personastate) {
+        this.personastate = personastate;
     }
 }
