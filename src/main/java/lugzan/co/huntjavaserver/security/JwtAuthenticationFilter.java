@@ -42,9 +42,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             accessJwtToken = authHeader.substring(7);
-        } else {
-            refreshJwtToken = extractJwtFromCookies(request);
         }
+        refreshJwtToken = extractJwtFromCookies(request);
 
         if (StringUtils.hasText(accessJwtToken) && !JwtService.isTokenExpired(accessJwtToken)) {
             Claims claims = JwtService.getTokenData(accessJwtToken);
@@ -62,16 +61,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String newToken = JwtService.createAccessJwtToken(user.getId(), userName);
                 response.setHeader("Authorization", newToken);
 
+                Optional<RefreshToken> userRefreshToken = refreshTokenRepository.findByUser(user);
+                if (userRefreshToken.isPresent()) {
+                    response.setHeader("Set-Cookie", "auth-token=" + userRefreshToken.get().getToken() + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
+                }
+
                 chain.doFilter(request, response);
                 return;
             }
-        } else if (StringUtils.hasText(refreshJwtToken) && !JwtService.isTokenExpired(refreshJwtToken)) {
+        }
+
+        if (StringUtils.hasText(refreshJwtToken) && !JwtService.isTokenExpired(refreshJwtToken)) {
             Claims claims = JwtService.getTokenData(refreshJwtToken);
 
             String userName = claims.getSubject();
             UserModel user = userRepository.findByUsername(userName);
 
-            if (user != null) {               
+            if (user != null) {              
                 Optional<RefreshToken> refreshToken = refreshTokenRepository.findByUser(user);
 
                 if (refreshToken.isPresent() && refreshJwtToken.equals(refreshToken.get().getToken()) && !JwtService.isTokenExpired(refreshToken.get().getToken())) {
