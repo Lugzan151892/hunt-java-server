@@ -2,6 +2,7 @@ package lugzan.co.huntjavaserver.models.banned_users;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Objects;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -103,6 +104,19 @@ public class BannedUser {
         setSteamId(request.getSteamId());
         setUser(user);
         setComment(request.getComment());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BannedUser that = (BannedUser) o;
+        return Objects.equals(id, that.id) && Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, user);
     }
 
     public Long getId() {

@@ -31,6 +31,9 @@ public class ApiErrorMessages {
             case BANNED_USER_EXIST -> {
                 return "This user already added, check your list";
             }
+            case BANNED_ID_NOT_FOUND -> {
+                return "User with id " + value + " not found";
+            }
             default -> {
                 return "Unexpected error occurred. Please try again.";
             }
