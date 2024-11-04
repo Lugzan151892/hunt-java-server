@@ -74,26 +74,24 @@ public class SteamController {
         List<SteamPlayer> playersData = SteamService.getSteamUserData(bannedIds, restTemplate);
         List<BannedUser> bannedUsers = user.getBannedUsers();
 
-        for (BannedUser bannedUser : bannedUsers) {
-            for (SteamPlayer player : playersData) {
-                if (bannedUser.getSteamId().equals(player.getSteamId())) {
-                    bannedUser.setPersonaName(player.getPersonaName());
-                    bannedUser.setProfileUrl(player.getProfileUrl());
-                    bannedUser.setAvatarFull(player.getAvatarFull());
-                    bannedUser.setAvatarMedium(player.getAvatarMedium());
-                    bannedUser.setProfileState(player.getProfileState());
-                    bannedUser.setCommunityVisibilityState(player.getCommunityVisibilityState());
-                    bannedUser.setCommentPermission(player.getCommentPermission());
-                    bannedUser.setAvatar(player.getAvatar());
-                    bannedUser.setLastlogoff(player.getLastlogoff());
-                    bannedUser.setPrimaryclanid(player.getPrimaryclanid());
-                    bannedUser.setTimecreated(player.getTimecreated());
-                    bannedUser.setPersonastateflags(player.getPersonastateflags());
-                    bannedUser.setPersonastate(player.getPersonastate());
-                    bannedUser.setBanned(SteamService.isProfileBanned(player.getProfileUrl()));
-                }
-            }
-        }
+        bannedUsers.parallelStream().forEach(bannedUser -> {
+            playersData.stream().filter(player -> bannedUser.getSteamId().equals(player.getSteamId())).findFirst().ifPresent(player -> {
+                bannedUser.setPersonaName(player.getPersonaName());
+                bannedUser.setProfileUrl(player.getProfileUrl());
+                bannedUser.setAvatarFull(player.getAvatarFull());
+                bannedUser.setAvatarMedium(player.getAvatarMedium());
+                bannedUser.setProfileState(player.getProfileState());
+                bannedUser.setCommunityVisibilityState(player.getCommunityVisibilityState());
+                bannedUser.setCommentPermission(player.getCommentPermission());
+                bannedUser.setAvatar(player.getAvatar());
+                bannedUser.setLastlogoff(player.getLastlogoff());
+                bannedUser.setPrimaryclanid(player.getPrimaryclanid());
+                bannedUser.setTimecreated(player.getTimecreated());
+                bannedUser.setPersonastateflags(player.getPersonastateflags());
+                bannedUser.setPersonastate(player.getPersonastate());
+                bannedUser.setBanned(SteamService.isProfileBanned(player.getProfileUrl()));
+            });
+        });
 
         SteamListResponse response = new SteamListResponse(bannedUsers);
 

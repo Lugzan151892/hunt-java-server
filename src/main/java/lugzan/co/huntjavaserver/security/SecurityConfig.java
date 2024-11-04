@@ -13,6 +13,7 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import lugzan.co.huntjavaserver.repository.RefreshTokenRepository;
 import lugzan.co.huntjavaserver.repository.UserRepository;
+import lugzan.co.huntjavaserver.services.enviromentvariables.EnviromentVariables;
 
 @Configuration
 @EnableWebSecurity
@@ -36,25 +37,13 @@ public class SecurityConfig {
         )
         .cors(cors -> cors.configurationSource(request -> {
             var corsConfiguration = new CorsConfiguration();
-            corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8000"));
+            corsConfiguration.setAllowedOrigins(Arrays.asList(EnviromentVariables.getOriginsList().split(",")));
             corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
             corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
             corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization", "Content-Type"));
             corsConfiguration.setAllowCredentials(true);
             return corsConfiguration;
         }))
-        // .exceptionHandling((exceptionHandling) -> exceptionHandling
-            // .authenticationEntryPoint((request, response, authException) -> {
-            //     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-            // })
-            // .authenticationEntryPoint((request, response, authException) -> {
-            //     if (authException instanceof AuthenticationException) {
-            //         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-            //     } else {
-            //         response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
-            //     }
-            // })
-        // )
         .exceptionHandling(exceptionHandling -> exceptionHandling
             .authenticationEntryPoint((request, response, authException) -> 
                 response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized")
