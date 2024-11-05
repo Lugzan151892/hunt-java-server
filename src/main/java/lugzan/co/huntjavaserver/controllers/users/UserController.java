@@ -91,6 +91,7 @@ public class UserController {
         } else {
             String newToken = JwtService.createRefreshJwtToken(user.getId(), user.getUsername());
             RefreshToken newRefreshToken = new RefreshToken(newToken, user);
+            refreshToken = newRefreshToken;
             refreshTokenRepository.save(newRefreshToken);
         }
 
