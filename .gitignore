@@ -35,4 +35,6 @@ build/
 ### LOCAL PRIVATE VARIABLES ###
 /src/main/java/lugzan/co/huntjavaserver/utils/PrivateVariables.java
 /src/main/java/resources/application.properties
+/src/main/java/resources/application.properties.local
 /src/main/resources/application.properties
+/src/main/resources/application.properties.local

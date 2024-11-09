@@ -24,4 +24,8 @@ public class EnviromentVariables {
     public static String getJwtSecretKey() {
         return env.getProperty("jwt.token.secret.key");
     }
+
+    public static String getOriginsList() {
+        return env.getProperty("allowed.origins");
+    }
 }

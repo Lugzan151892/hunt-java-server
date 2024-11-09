@@ -5,6 +5,7 @@ spring.datasource.username=
 spring.datasource.password=
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 server.port=8000
+allowed.origins=http://localhost:3000,http://localhost:8000
 steam.api.url=
 steam.api.key=
 jwt.token.secret.key=
