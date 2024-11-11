@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,10 +19,12 @@ import lugzan.co.huntjavaserver.services.enviromentvariables.EnviromentVariables
 public class SecurityConfig {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    public SecurityConfig(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository) {
+    public SecurityConfig(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
     @SuppressWarnings("unused")
@@ -45,9 +46,7 @@ public class SecurityConfig {
             return corsConfiguration;
         }))
         .exceptionHandling(exceptionHandling -> exceptionHandling
-            .authenticationEntryPoint((request, response, authException) -> 
-                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized")
-            )
+            .authenticationEntryPoint(customAuthenticationEntryPoint)
         )
         .addFilterBefore(new JwtAuthenticationFilter(userRepository, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class);
 
