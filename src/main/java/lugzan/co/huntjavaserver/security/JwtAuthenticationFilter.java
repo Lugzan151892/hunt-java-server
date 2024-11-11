@@ -63,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 Optional<RefreshToken> userRefreshToken = refreshTokenRepository.findByUser(user);
                 if (userRefreshToken.isPresent()) {
-                    response.setHeader("Set-Cookie", "auth-token=" + userRefreshToken.get().getToken() + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
+                    response.setHeader("Set-Cookie", "auth-token=" + userRefreshToken.get().getToken() + "; HttpOnly; Path=/; Max-Age=604800; SameSite=Lax");
                 }
 
                 chain.doFilter(request, response);
@@ -91,7 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     response.setHeader("Authorization", newAccessToken);
-                    response.setHeader("Set-Cookie", "auth-token=" + newRefreshToken + "; HttpOnly; Path=/; Max-Age=86400; SameSite=Lax");
+                    response.setHeader("Set-Cookie", "auth-token=" + newRefreshToken + "; HttpOnly; Path=/; Max-Age=604800; SameSite=Lax");
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
