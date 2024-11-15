@@ -1,7 +1,6 @@
 package lugzan.co.huntjavaserver.security;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,35 +12,42 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import lugzan.co.huntjavaserver.repository.RefreshTokenRepository;
 import lugzan.co.huntjavaserver.repository.UserRepository;
+import lugzan.co.huntjavaserver.services.enviromentvariables.EnviromentVariables;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
-    public SecurityConfig(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository) {
+    public SecurityConfig(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository, CustomAuthenticationEntryPoint customAuthenticationEntryPoint) {
         this.userRepository = userRepository;
         this.refreshTokenRepository = refreshTokenRepository;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
     }
 
+    @SuppressWarnings("unused")
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests((requests) -> requests
-            .requestMatchers("/api/user/login", "/api/user/registration").permitAll()
+            .requestMatchers("/api/user/login", "/api/user/registration", "/api/user/logout").permitAll()
             .anyRequest().authenticated()
         )
         .cors(cors -> cors.configurationSource(request -> {
             var corsConfiguration = new CorsConfiguration();
-            corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-            corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-            corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
-            corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie"));
+            corsConfiguration.setAllowedOrigins(Arrays.asList(EnviromentVariables.getOriginsList().split(",")));
+            corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+            corsConfiguration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization", "Content-Type"));
             corsConfiguration.setAllowCredentials(true);
             return corsConfiguration;
         }))
+        .exceptionHandling(exceptionHandling -> exceptionHandling
+            .authenticationEntryPoint(customAuthenticationEntryPoint)
+        )
         .addFilterBefore(new JwtAuthenticationFilter(userRepository, refreshTokenRepository), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

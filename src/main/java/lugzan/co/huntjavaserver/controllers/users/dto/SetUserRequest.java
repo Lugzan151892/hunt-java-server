@@ -1,12 +1,13 @@
-package lugzan.co.huntjavaserver.controllers.users;
+package lugzan.co.huntjavaserver.controllers.users.dto;
 
 import java.util.List;
+import java.util.Map;
 
 public class SetUserRequest {
-    private String hunt_settings;
+    private Map<String, Object> hunt_settings;
     private List<String> spectated_users;
 
-    public String getHunt_settings() {
+    public Map<String, Object> getHunt_settings() {
         return hunt_settings;
     }
 

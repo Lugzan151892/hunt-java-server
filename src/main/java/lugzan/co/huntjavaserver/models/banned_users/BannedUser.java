@@ -1,23 +1,30 @@
 package lugzan.co.huntjavaserver.models.banned_users;
 
+import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
+import java.util.Objects;
 
-import jakarta.persistence.CascadeType;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import lugzan.co.huntjavaserver.models.banned_users_comments.BannedComment;
+import jakarta.persistence.Transient;
+import lugzan.co.huntjavaserver.controllers.banned_users.dto.AddBannedRequest;
 import lugzan.co.huntjavaserver.models.user.UserModel;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "banned_users")
 public class BannedUser {
 
@@ -25,48 +32,238 @@ public class BannedUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "steam_id")
-    private Integer steam_id;
+    @Column(name = "steam_id", nullable = false)
+    private String steamId;
 
-    @Column(name = "created_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Timestamp createdAt;
 
-    @OneToMany(mappedBy = "banned_user", cascade = CascadeType.ALL)
-    private List<BannedComment> comments;
+    @LastModifiedDate
+    @Column(name = "updated_at",nullable = false)
+    private Timestamp updatedAt;
 
-    @ManyToMany(mappedBy = "banned_users")
-    private List<UserModel> users;
+    private String comment = "";
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
+    private UserModel user;
+
+    /** Не записываем в БД */
+    @Transient
+    private Integer communityVisibilityState;
+
+    @Transient
+    private Integer profileState;
+
+    @Transient
+    private String personaName;
+
+    @Transient
+    private String profileUrl;
+
+    @Transient
+    private String avatarMedium;
+
+    @Transient
+    private String avatarFull;
+
+    @Transient
+    private Integer commentPermission;
+
+    @Transient
+    private String avatar;
+
+    @Transient
+    private Integer lastlogoff;
+
+    @Transient
+    private String primaryclanid;
+
+    @Transient
+    private Integer timecreated;
+
+    @Transient
+    private Integer personastateflags;
+
+    @Transient
+    private Boolean banned;
+
+    @Transient
+    private Integer personastate;
+
+    public BannedUser() {}
+
+    public BannedUser(String steamId, UserModel user) {
+        setSteamId(steamId);
+        setUser(user);
+    }
+
+    public BannedUser(AddBannedRequest request, UserModel user) {
+        setSteamId(request.getSteamId());
+        setUser(user);
+        setComment(request.getComment());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BannedUser that = (BannedUser) o;
+        return Objects.equals(id, that.id) && Objects.equals(user, that.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, user);
+    }
 
     public Long getId() {
         return id;
     }
 
-    public Integer getSteam_id() {
-        return steam_id;
+    public String getSteamId() {
+        return steamId;
     }
 
     public Date getCreatedAt() {
         return createdAt;
     }
 
-    public List<BannedComment> getComments() {
-        return comments;
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
     }
 
-    public List<UserModel> getUsers() {
-        return users;
+    public UserModel getUser() {
+        return user;
     }
 
-    public void setSteam_id(Integer steam_id) {
-        this.steam_id = steam_id;
+    public String getComment() {
+        return comment;
     }
 
-    public void setComments(List<BannedComment> comments) {
-        this.comments = comments;
+    public void setSteamId(String steam_id) {
+        this.steamId = steam_id;
     }
 
-    public void setUsers(List<UserModel> users) {
-        this.users = users;
+    public void setUser(UserModel user) {
+        this.user = user;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    /** Поля не записанные в БД */
+    public String getAvatarFull() {
+        return avatarFull;
+    }
+
+    public void setAvatarFull(String avatarFull) {
+        this.avatarFull = avatarFull;
+    }
+
+    public String getAvatarMedium() {
+        return avatarMedium;
+    }
+
+    public void setAvatarMedium(String avatarMedium) {
+        this.avatarMedium = avatarMedium;
+    }
+
+    public Integer getCommunityVisibilityState() {
+        return communityVisibilityState;
+    }
+
+    public void setCommunityVisibilityState(Integer communityVisibilityState) {
+        this.communityVisibilityState = communityVisibilityState;
+    }
+
+    public String getPersonaName() {
+        return personaName;
+    }
+    public void setPersonaName(String personaName) {
+        this.personaName = personaName;
+    }
+
+    public String getProfileUrl() {
+        return profileUrl;
+    }
+
+    public void setProfileUrl(String profileUrl) {
+        this.profileUrl = profileUrl;
+    }
+
+    public Integer getProfileState() {
+        return profileState;
+    }
+
+    public void setProfileState(Integer profileState) {
+        this.profileState = profileState;
+    }
+
+    public Integer getCommentPermission() {
+        return commentPermission;
+    }
+
+    public void setCommentPermission(Integer commentPermission) {
+        this.commentPermission = commentPermission;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Integer getLastlogoff() {
+        return lastlogoff;
+    }
+
+    public void setLastlogoff(Integer lastlogoff) {
+        this.lastlogoff = lastlogoff;
+    }
+
+    public Integer getPersonastateflags() {
+        return personastateflags;
+    }
+
+    public void setPersonastateflags(Integer personastateflags) {
+        this.personastateflags = personastateflags;
+    }
+
+    public String getPrimaryclanid() {
+        return primaryclanid;
+    }
+
+    public void setPrimaryclanid(String primaryclanid) {
+        this.primaryclanid = primaryclanid;
+    }
+
+    public Integer getTimecreated() {
+        return timecreated;
+    }
+
+    public void setTimecreated(Integer timecreated) {
+        this.timecreated = timecreated;
+    }
+
+    public Boolean getBanned() {
+        return banned;
+    }
+
+    public void setBanned(Boolean banned) {
+        this.banned = banned;
+    }
+
+    public Integer getPersonastate() {
+        return personastate;
+    }
+
+    public void setPersonastate(Integer personastate) {
+        this.personastate = personastate;
     }
 }
